@@ -145,11 +145,11 @@ app.post('/login', async (req, res) => {
 // ===============================
 // Protected Route
 // ===============================
-// Define the /protected route to demonstrate token verification
-app.get('/protected', authenticateToken, (req, res) => {
+// Define the /protected route to access dashboard/homepage
+app.get('/homepage', authenticateToken, (req, res) => {
   // Respond with a message and the authenticated user's data
   res.json({ 
-    message: 'Access to protected resource', 
+    message: 'User can access dashboard', 
     user: req.user 
   });
 });
