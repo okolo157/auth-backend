@@ -1,12 +1,12 @@
 // Load environment variables from a .env file into process.env
-require('dotenv').config();
+require("dotenv").config();
 
 // Import required modules
-const express = require('express'); // Framework for building web applications
-const mongoose = require('mongoose'); // MongoDB object modeling tool
-const jwt = require('jsonwebtoken'); // JSON Web Token library for authentication
-const cors = require('cors'); // Middleware to enable Cross-Origin Resource Sharing
-const bcrypt = require('bcryptjs'); // Library to hash passwords
+const express = require("express"); // Framework for building web applications
+const mongoose = require("mongoose"); // MongoDB object modeling tool
+const jwt = require("jsonwebtoken"); // JSON Web Token library for authentication
+const cors = require("cors"); // Middleware to enable Cross-Origin Resource Sharing
+const bcrypt = require("bcryptjs"); // Library to hash passwords
 
 // Initialize the Express app
 const app = express();
@@ -25,53 +25,55 @@ app.use(express.json());
 // ===============================
 // Define the schema for user documents in MongoDB
 const UserSchema = new mongoose.Schema({
-  username: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  username: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  email: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  email: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  password: { 
-    type: String, 
-    required: true 
-  }
+  password: {
+    type: String,
+    required: true,
+  },
 });
 
 // Create a User model using the defined schema
-const User = mongoose.model('User', UserSchema);
-
+const User = mongoose.model("User", UserSchema);
+const URI =
+  "mongodb+srv://kennyabolade117:Jrzfi7b71DFRacTH@cluster0.vitq7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // ===============================
 // Connect to MongoDB
 // ===============================
 // Connect to the MongoDB database using the connection string from environment variables
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB Connected')) // Log success message on connection
-.catch(err => console.error('MongoDB Connection Error:', err)); // Log error if connection fails
+mongoose
+  .connect(URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB Connected")) // Log success message on connection
+  .catch((err) => console.error("MongoDB Connection Error:", err)); // Log error if connection fails
 
 // ===============================
 // User Signup Endpoint
 // ===============================
 // Define the /signup route to handle user registration
-app.post('/signup', async (req, res) => {
+app.post("/signup", async (req, res) => {
   try {
     // Extract the username, email, and password from the request body
     const { username, email, password } = req.body;
-    
+
     // Check if a user with the same username or email already exists
-    let user = await User.findOne({ 
-      $or: [{ email }, { username }] 
+    let user = await User.findOne({
+      $or: [{ email }, { username }],
     });
 
     if (user) {
       // If user exists, respond with a 400 status and an error message
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: "User already exists" });
     }
 
     // Generate a salt for password hashing
@@ -80,10 +82,10 @@ app.post('/signup', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create a new user object with the provided details
-    user = new User({ 
-      username, 
-      email, 
-      password: hashedPassword 
+    user = new User({
+      username,
+      email,
+      password: hashedPassword,
     });
 
     // Save the new user to the database
@@ -91,16 +93,16 @@ app.post('/signup', async (req, res) => {
 
     // Generate a JWT token for the newly registered user
     const token = jwt.sign(
-      { id: user._id, username: user.username }, 
-      SECRET_KEY, 
-      { expiresIn: '1h' } // Token expires in 1 hour
+      { id: user._id, username: user.username },
+      SECRET_KEY,
+      { expiresIn: "1h" } // Token expires in 1 hour
     );
 
     // Respond with the generated token
     res.status(201).json({ token });
   } catch (error) {
     // Respond with a 500 status if there is a server error
-    res.status(500).json({ message: 'Server error', error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 
@@ -108,37 +110,37 @@ app.post('/signup', async (req, res) => {
 // User Login Endpoint
 // ===============================
 // Define the /login route to handle user authentication
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     // Extract the username and password from the request body
     const { username, password } = req.body;
-    
+
     // Find a user with the provided username
     const user = await User.findOne({ username });
     if (!user) {
       // Respond with a 400 status if the user is not found
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // Compare the provided password with the stored hashed password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       // Respond with a 400 status if the password does not match
-      return res.status(400).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     // Generate a JWT token for the authenticated user
     const token = jwt.sign(
-      { id: user._id, username: user.username }, 
-      SECRET_KEY, 
-      { expiresIn: '1h' } // Token expires in 1 hour
+      { id: user._id, username: user.username },
+      SECRET_KEY,
+      { expiresIn: "1h" } // Token expires in 1 hour
     );
 
     // Respond with the generated token
     res.json({ token });
   } catch (error) {
     // Respond with a 500 status if there is a server error
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -146,11 +148,11 @@ app.post('/login', async (req, res) => {
 // Protected Route
 // ===============================
 // Define the /protected route to access dashboard/homepage
-app.get('/homepage', authenticateToken, (req, res) => {
+app.get("/homepage", authenticateToken, (req, res) => {
   // Respond with a message and the authenticated user's data
-  res.json({ 
-    message: 'User can access dashboard', 
-    user: req.user 
+  res.json({
+    message: "User can access dashboard",
+    user: req.user,
   });
 });
 
@@ -160,13 +162,13 @@ app.get('/homepage', authenticateToken, (req, res) => {
 // Middleware to authenticate JWT tokens
 function authenticateToken(req, res, next) {
   // Extract the Authorization header from the request
-  const authHeader = req.headers['authorization'];
+  const authHeader = req.headers["authorization"];
   // Extract the token from the header (format: "Bearer <token>")
-  const token = authHeader && authHeader.split(' ')[1];
-  
+  const token = authHeader && authHeader.split(" ")[1];
+
   // If no token is provided, respond with a 401 status
   if (token == null) return res.sendStatus(401);
-  
+
   // Verify the token using the secret key
   jwt.verify(token, SECRET_KEY, (err, user) => {
     if (err) return res.sendStatus(403); // Respond with 403 if the token is invalid
