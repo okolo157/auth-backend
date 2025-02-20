@@ -48,7 +48,7 @@ const UserSchema = new mongoose.Schema({
 // Create a User model using the defined schema
 const User = mongoose.model("User", UserSchema);
 const URI =
-  "mongodb+srv://kennyabolade117:Jrzfi7b71DFRacTH@cluster0.vitq7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+  "mongodb+srv://kennyabolade117:MrT4XjABj5yYiNdk@cluster0.vitq7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // ===============================
 // Connect to MongoDB
 // ===============================
