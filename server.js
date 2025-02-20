@@ -1,5 +1,7 @@
 // Load environment variables from a .env file into process.env
 require("dotenv").config();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 
 // Import required modules
 const express = require("express"); // Framework for building web applications
@@ -7,6 +9,8 @@ const mongoose = require("mongoose"); // MongoDB object modeling tool
 const jwt = require("jsonwebtoken"); // JSON Web Token library for authentication
 const cors = require("cors"); // Middleware to enable Cross-Origin Resource Sharing
 const bcrypt = require("bcryptjs"); // Library to hash passwords
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+
 
 // Initialize the Express app
 const app = express();
@@ -154,6 +158,19 @@ app.get("/homepage", authenticateToken, (req, res) => {
     message: "User can access dashboard",
     user: req.user,
   });
+});
+
+API_KEY = AIzaSyDEsXiNis46sEK44WW1dAOyZzOkyAPzPG8
+app.post("/translate", async (req, res) => {
+  try {
+    const { textTotranslate } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Translate this text: ${textTotranslate} to yoruba, dont give me anything else apart from the translation`;
+    const result = await model.generateContent(prompt);
+    res.json(result.response.text());
+  } catch (error) {
+    console.log(error);   
+  }
 });
 
 // ===============================
