@@ -160,7 +160,6 @@ app.get("/homepage", authenticateToken, (req, res) => {
   });
 });
 
-API_KEY = AIzaSyDEsXiNis46sEK44WW1dAOyZzOkyAPzPG8
 app.post("/translate", async (req, res) => {
   try {
     const { textTotranslate } = req.body;
