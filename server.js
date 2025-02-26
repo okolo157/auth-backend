@@ -1,5 +1,6 @@
 // Load environment variables from a .env file into process.env
 require("dotenv").config();
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Import required modules
 const express = require("express"); // Framework for building web applications
@@ -7,7 +8,7 @@ const mongoose = require("mongoose"); // MongoDB object modeling tool
 const jwt = require("jsonwebtoken"); // JSON Web Token library for authentication
 const cors = require("cors"); // Middleware to enable Cross-Origin Resource Sharing
 const bcrypt = require("bcryptjs"); // Library to hash passwords
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 // Initialize the Express app
 const app = express();
@@ -47,13 +48,14 @@ const UserSchema = new mongoose.Schema({
 
 // Create a User model using the defined schema
 const User = mongoose.model("User", UserSchema);
-
+const URI =
+  "mongodb+srv://kennyabolade117:MrT4XjABj5yYiNdk@cluster0.vitq7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // ===============================
 // Connect to MongoDB
 // ===============================
 // Connect to the MongoDB database using the connection string from environment variables
 mongoose
-  .connect(process.env.MONGODB_URI, {
+  .connect(URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -116,7 +118,7 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     // Extract the username and password from the request body
-    const { query } = req.query;
+    const { username, password } = req.body;
 
     // Find a user with the provided username
     const user = await User.findOne({ query });
@@ -150,25 +152,24 @@ app.post("/login", async (req, res) => {
 // ===============================
 // Protected Route
 // ===============================
-// Define the /protected route to demonstrate token verification
-app.get("/protected", authenticateToken, (req, res) => {
+// Define the /protected route to access dashboard/homepage
+app.get("/homepage", authenticateToken, (req, res) => {
   // Respond with a message and the authenticated user's data
   res.json({
-    message: "Access to protected resource",
+    message: "User can access dashboard",
     user: req.user,
   });
 });
 
 app.post("/translate", async (req, res) => {
   try {
-    const { text } = req.body;
-    const prompt = `convert this ${text} to spanish`;
+    const { textTotranslate } = req.body;
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Translate this text: ${textTotranslate} to yoruba, dont give me anything else apart from the translation`;
     const result = await model.generateContent(prompt);
-    const responseText = result.response.text();
-    res.json(`Translated text is ${responseText}`);
-    console.log(responseText);
+    res.json(result.response.text());
   } catch (error) {
-    res.status(500).json({ message: "Translation failed" });
+    console.log(error);
   }
 });
 
