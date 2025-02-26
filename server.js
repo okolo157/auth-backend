@@ -8,7 +8,6 @@ const mongoose = require("mongoose"); // MongoDB object modeling tool
 const jwt = require("jsonwebtoken"); // JSON Web Token library for authentication
 const cors = require("cors"); // Middleware to enable Cross-Origin Resource Sharing
 const bcrypt = require("bcryptjs"); // Library to hash passwords
-const genAI = new GoogleGenerativeAI(process.env.API_KEY);
 
 // Initialize the Express app
 const app = express();
@@ -84,7 +83,7 @@ app.post("/signup", async (req, res) => {
     // Generate a salt for password hashing
     const salt = await bcrypt.genSalt(10);
     // Hash the user's password using bcrypt
-    const hashedPassword = await bcrypt.hash(password, salt); 
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create a new user object with the provided details
     user = new User({
